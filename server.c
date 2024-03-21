@@ -24,8 +24,8 @@ void handle_request(int nfd) {
     while ((num = getline(&line, &size, network)) >= 0)
         write(nfd, line, num);
 
-    free(line);
-    fclose(network);
+         free(line);
+         fclose(network);
 }
 
 void sigchld_handler(int signum) {
@@ -35,10 +35,8 @@ void sigchld_handler(int signum) {
     while ((pid = waitpid(-1, &status, WNOHANG)) > 0)
         printf("Child process %d terminated\n", pid);
 }
-
 void run_service(int fd) {
     signal(SIGCHLD, sigchld_handler);
-
     while (1) {
         int nfd = accept_connection(fd);
         if (nfd != -1) {
@@ -50,6 +48,7 @@ void run_service(int fd) {
                 exit(1);
             } else if (pid == 0) {
                 close(fd);
+                printf("A child has spawned\n"); 
                 handle_request(nfd);
                 close(nfd);
                 exit(0);
@@ -59,14 +58,12 @@ void run_service(int fd) {
         }
     }
 }
-
 int main(void) {
     int fd = create_service(PORT);
     if (fd == -1) {
         perror(0);
         exit(1);
     }
-
     printf("Listening: %d\n", PORT);
     run_service(fd);
 
